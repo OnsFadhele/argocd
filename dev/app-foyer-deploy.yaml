@@ -19,7 +19,7 @@ spec:
         image: onsfadhel/tpfoyeresprit:latest
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://10.106.69.167:3306/foyer_db?createDatabaseIfNotExist=true"
+          value: "jdbc:mysql://10.102.93.83:3306/foyer_db?createDatabaseIfNotExist=true"
         - name: SPRING_DATASOURCE_USERNAME
           value: "root"
         - name: SPRING_DATASOURCE_PASSWORD
