@@ -52,7 +52,7 @@ spec:
         command: ['sh', '-c', 'mysqld --initialize --user=mysql --datadir=/var/lib/mysql']
         volumeMounts:
         - mountPath: /var/lib/mysql
-          name: mysql-storage
+          name: mysql-storage  # This should match the volume name
       containers:
       - name: mysqldb
         image: mysql:5.7
@@ -65,7 +65,11 @@ spec:
         - containerPort: 3306
         volumeMounts:
         - mountPath: /var/lib/mysql
-          name: mysql-storage
+          name: mysql-storage  # This should match the volume name
+      volumes:  # This is where the volume is defined
+      - name: mysql-storage  # Ensure this name matches the volumeMount names
+        persistentVolumeClaim:
+          claimName: my-datavolume-foyer-pvc
 ---
 # Service pour exposer la base de données MySQL en interne
 apiVersion: v1
