@@ -1,3 +1,18 @@
+# PersistentVolume pour le stockage de la base de données
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-datavolume-foyer-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain  # Pour conserver les données même après suppression
+  hostPath:
+    path: "/mnt/data"  # Chemin sur le nœud Kubernetes (ceci peut varier selon votre environnement)
+---
+# PersistentVolumeClaim pour lier le PV au pod mysqldb
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -7,9 +22,10 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi  # Modifiez la taille si nécessaire
-
+      storage: 1Gi
+  volumeName: my-datavolume-foyer-pv  # Relier au PV existant
 ---
+# Déploiement de la base de données MySQL avec un volume persistant
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -36,8 +52,15 @@ spec:
           value: "foyer_db"
         ports:
         - containerPort: 3306
-
+        volumeMounts:
+        - mountPath: /var/lib/mysql  # Emplacement de stockage des données MySQL dans le conteneur
+          name: mysql-storage
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: my-datavolume-foyer-pvc  # Utilisation du PVC
 ---
+# Service pour exposer la base de données MySQL en interne
 apiVersion: v1
 kind: Service
 metadata:
