@@ -3,33 +3,37 @@ apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: my-datavolume-foyer-pv
+  namespace: foyer  # Ajout de l'espace de noms pour cohérence
 spec:
   capacity:
     storage: 1Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain  # Pour conserver les données même après suppression
+  storageClassName: ""  # Assurez-vous que cela correspond à votre besoin
   hostPath:
-    path: "/mnt/data"  # Chemin sur le nœud Kubernetes (ceci peut varier selon votre environnement)
+    path: /mnt/data  # Chemin sur le nœud Kubernetes (ceci peut varier selon votre environnement)
 ---
 # PersistentVolumeClaim pour lier le PV au pod mysqldb
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: my-datavolume-foyer-pvc
+  namespace: foyer  # Ajout de l'espace de noms pour cohérence
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
-  volumeName: my-datavolume-foyer-pv  # Relier au PV existant
+  storageClassName: ""  # Doit correspondre à celui du PV
 ---
 # Déploiement de la base de données MySQL avec un volume persistant
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysqldb
+  namespace: foyer  # Ajout de l'espace de noms pour cohérence
   labels:
     app: mysqldb
 spec:
@@ -65,6 +69,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysqldb
+  namespace: foyer  # Ajout de l'espace de noms pour cohérence
 spec:
   type: ClusterIP
   ports:
