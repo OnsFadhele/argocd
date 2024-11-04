@@ -66,10 +66,6 @@ spec:
         volumeMounts:
         - mountPath: /var/lib/mysql
           name: mysql-storage
-      volumes:
-      - name: mysql-storage
-        persistentVolumeClaim:
-          claimName: my-datavolume-foyer-pvc
 ---
 # Service pour exposer la base de données MySQL en interne
 apiVersion: v1
