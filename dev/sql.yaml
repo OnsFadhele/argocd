@@ -1,41 +1,7 @@
-# PersistentVolume pour le stockage de la base de données
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: my-datavolume-foyer-pv
-  namespace: foyer
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: my-storage-class  # Specify a storage class name
-  hostPath:
-    path: /mnt/data  # Chemin sur le nœud Kubernetes
-
----
-# PersistentVolumeClaim pour lier le PV au pod mysqldb
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: my-datavolume-foyer-pvc
-  namespace: foyer
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: my-storage-class  # Match the storage class name in PV
-
----
-# Déploiement de la base de données MySQL avec un volume persistant
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysqldb
-  namespace: foyer
   labels:
     app: mysqldb
 spec:
@@ -53,26 +19,17 @@ spec:
         image: mysql:5.7
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "root"  # Set the root password for MySQL
+          value: "root"
         - name: MYSQL_DATABASE
-          value: "foyer_db"  # Name of the initial database to create
+          value: "foyer_db"
         ports:
         - containerPort: 3306
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: mysql-storage  # This should match the volume name
-      volumes:  # This is where the volume is defined
-      - name: mysql-storage  # Ensure this name matches the volumeMount names
-        persistentVolumeClaim:
-          claimName: my-datavolume-foyer-pvc
 
 ---
-# Service pour exposer la base de données MySQL en interne
 apiVersion: v1
 kind: Service
 metadata:
   name: mysqldb
-  namespace: foyer
 spec:
   type: ClusterIP
   ports:
