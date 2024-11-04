@@ -10,9 +10,10 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  storageClassName: my-storage-class  # Specify a storage class name
   hostPath:
     path: /mnt/data  # Chemin sur le nœud Kubernetes
+
 ---
 # PersistentVolumeClaim pour lier le PV au pod mysqldb
 apiVersion: v1
@@ -26,7 +27,8 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: ""
+  storageClassName: my-storage-class  # Match the storage class name in PV
+
 ---
 # Déploiement de la base de données MySQL avec un volume persistant
 apiVersion: apps/v1
@@ -46,21 +48,14 @@ spec:
       labels:
         app: mysqldb
     spec:
-      initContainers:
-      - name: init-mysql
-        image: mysql:5.7
-        command: ['sh', '-c', 'mysqld --initialize --user=mysql --datadir=/var/lib/mysql']
-        volumeMounts:
-        - mountPath: /var/lib/mysql
-          name: mysql-storage  # This should match the volume name
       containers:
       - name: mysqldb
         image: mysql:5.7
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "root"
+          value: "root"  # Set the root password for MySQL
         - name: MYSQL_DATABASE
-          value: "foyer_db"
+          value: "foyer_db"  # Name of the initial database to create
         ports:
         - containerPort: 3306
         volumeMounts:
@@ -70,6 +65,7 @@ spec:
       - name: mysql-storage  # Ensure this name matches the volumeMount names
         persistentVolumeClaim:
           claimName: my-datavolume-foyer-pvc
+
 ---
 # Service pour exposer la base de données MySQL en interne
 apiVersion: v1
